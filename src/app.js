@@ -49,8 +49,8 @@ function restoreFocus(descriptor) {
   window.requestAnimationFrame(() => root.querySelector(selectors[descriptor.type])?.focus({ preventScroll: true }));
 }
 
-function render() {
-  const focusDescriptor = captureFocus();
+function render(nextFocusDescriptor) {
+  const focusDescriptor = nextFocusDescriptor || captureFocus();
   const era = selectedEra();
   const point = selectedPoint();
   const progress = getProgress(state);
@@ -153,41 +153,41 @@ function renderRevision() {
 }
 
 function bindEvents() {
-  root.querySelectorAll('[data-era]').forEach((button) => button.addEventListener('click', () => { setEra(state, Number(button.dataset.era)); render(); const target = document.querySelector('#workbench'); if (target) window.scrollTo({ top: Math.max(0, target.offsetTop - 72), behavior: 'smooth' }); }));
-  root.querySelectorAll('[data-point]').forEach((button) => button.addEventListener('click', () => { setPoint(state, button.dataset.point); render(); }));
-  root.querySelectorAll('[data-action]').forEach((button) => button.addEventListener('click', () => handleAction(button.dataset.action)));
-  root.querySelectorAll('[data-claim-type]').forEach((button) => button.addEventListener('click', () => handleClaimType(button.dataset.claimType)));
-  root.querySelectorAll('[data-source][data-relation]').forEach((button) => button.addEventListener('click', () => handleEvidence(button.dataset.source, button.dataset.relation)));
-  root.querySelectorAll('[data-preset]').forEach((button) => button.addEventListener('click', () => { state.lastNotice = `${button.textContent} 프리셋을 선택했습니다. 자동 회전은 없습니다.`; render(); }));
+  root.querySelectorAll('[data-era]').forEach((button) => button.addEventListener('click', () => { setEra(state, Number(button.dataset.era)); render({ type: 'era', value: button.dataset.era }); const target = document.querySelector('#workbench'); if (target) window.scrollTo({ top: Math.max(0, target.offsetTop - 72), behavior: 'smooth' }); }));
+  root.querySelectorAll('[data-point]').forEach((button) => button.addEventListener('click', () => { setPoint(state, button.dataset.point); render({ type: button.classList.contains('point-row') ? 'point-row' : 'point-marker', value: button.dataset.point }); }));
+  root.querySelectorAll('[data-action]').forEach((button) => button.addEventListener('click', () => handleAction(button.dataset.action, { type: 'action', value: button.dataset.action })));
+  root.querySelectorAll('[data-claim-type]').forEach((button) => button.addEventListener('click', () => handleClaimType(button.dataset.claimType, { type: 'claim', value: button.dataset.claimType })));
+  root.querySelectorAll('[data-source][data-relation]').forEach((button) => button.addEventListener('click', () => handleEvidence(button.dataset.source, button.dataset.relation, { type: 'evidence', source: button.dataset.source, relation: button.dataset.relation })));
+  root.querySelectorAll('[data-preset]').forEach((button) => button.addEventListener('click', () => { state.lastNotice = `${button.textContent} 프리셋을 선택했습니다. 자동 회전은 없습니다.`; render({ type: 'preset', value: button.dataset.preset }); }));
 }
 
-function handleAction(action) {
+function handleAction(action, focusDescriptor) {
   if (action === 'observe') { const point = selectedPoint(); observePoint(state, state.selectedPoint, getPointEraContent(point, state.selectedEra).observation); markTask(state, 'observation'); state.lastNotice = `${state.selectedPoint} · ${state.selectedEra} 관찰을 세션에 기록했습니다.`; }
   if (action === 'draft') { const field = root.querySelector('[data-explanation]'); recordDraft(state, field?.value || ''); markTask(state, state.draftAfter ? 'revision' : 'draft'); state.lastNotice = state.draftAfter ? '수정 전·후 설명을 기록했습니다.' : '초안 설명을 기록했습니다.'; }
   if (action === 'clue') { revealClue(state); markTask(state, 'clue'); }
   if (action === 'updates') { root.querySelector('[data-update-dialog]')?.showModal(); return; }
   if (action === 'close-updates') { root.querySelector('[data-update-dialog]')?.close(); return; }
-  render();
+  render(focusDescriptor);
 }
 
-function handleClaimType(type) {
+function handleClaimType(type, focusDescriptor) {
   const point = selectedPoint();
-  if (type === 'historicalFact') { state.lastNotice = '생성 장면에서 보인 문장은 역사 사실로 자동 승격하지 않습니다. 검수 완료된 직접 사료가 필요합니다.'; render(); return; }
+  if (type === 'historicalFact') { state.lastNotice = '생성 장면에서 보인 문장은 역사 사실로 자동 승격하지 않습니다. 검수 완료된 직접 사료가 필요합니다.'; render(focusDescriptor); return; }
   const existing = state.claims.find((claim) => claim.pointId === point.id && claim.era === state.selectedEra);
   if (existing) existing.type = type;
   else state.claims.push({ id: `claim-${state.selectedEra}-${point.id}`, text: getPointEraContent(point, state.selectedEra).observation, type, era: state.selectedEra, pointId: point.id, sourceIds: [] });
   state.lastNotice = `${CLAIM_TYPES.find((item) => item.id === type).label} 경계를 선택했습니다.`;
-  render();
+  render(focusDescriptor);
 }
 
-function handleEvidence(sourceId, relation) {
+function handleEvidence(sourceId, relation, focusDescriptor) {
   const source = sourceById(sourceId);
   const result = validateEvidence({ era: state.selectedEra, source, relation });
   const existingIndex = state.evidenceLinks.findIndex((item) => item.sourceId === sourceId && item.pointId === state.selectedPoint);
   const link = { sourceId, pointId: state.selectedPoint, era: state.selectedEra, relation, valid: result.valid, status: result.status, message: result.message };
   if (existingIndex >= 0) state.evidenceLinks[existingIndex] = link; else state.evidenceLinks.push(link);
   state.lastNotice = result.message;
-  render();
+  render(focusDescriptor);
 }
 
 function installImageFallbacks() {
