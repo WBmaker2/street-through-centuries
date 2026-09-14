@@ -46,7 +46,7 @@ function restoreFocus(descriptor) {
     'point-row': `.point-row[data-point="${descriptor.value}"]`,
     'point-marker': `.point-marker[data-point="${descriptor.value}"]`,
   };
-  root.querySelector(selectors[descriptor.type])?.focus({ preventScroll: true });
+  window.requestAnimationFrame(() => root.querySelector(selectors[descriptor.type])?.focus({ preventScroll: true }));
 }
 
 function render() {
