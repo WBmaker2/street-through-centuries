@@ -31,7 +31,10 @@ const topSections = [...fs.readFileSync(path.join(root, 'src/app.js'), 'utf8').m
 const odSections = [...fs.readFileSync(path.join(root, 'src/app.js'), 'utf8').matchAll(/<section[^>]+data-od-id=/g)].length;
 assert.equal(topSections, odSections, 'every rendered top-level section has data-od-id');
 assert.match(fs.readFileSync(path.join(root, 'src/app.js'), 'utf8'), /data-od-id="resources"/);
-assert.match(fs.readFileSync(path.join(root, 'src/app.js'), 'utf8'), /target="_blank" rel="noopener noreferrer"/);
+const app = fs.readFileSync(path.join(root, 'src/app.js'), 'utf8');
+assert.match(app, /target="_blank" rel="noopener noreferrer"/);
+assert.match(app, /render\(\{ type: 'era', value: button\.dataset\.era \}\)/, 'era keyboard activation passes its target to render');
+assert.match(app, /requestAnimationFrame\(\(\) => root\.querySelector/, 'focus restoration waits for the replacement DOM');
 assert.match(fs.readFileSync(path.join(root, 'HISTORICAL-EVIDENCE-MATRIX.md'), 'utf8'), /S01~S12.*목업.*검토 대기/s);
 assert.match(fs.readFileSync(path.join(root, 'EXPERT-REVIEW-PACKET.md'), 'utf8'), /전문 감수 대기/);
 assert.match(fs.readFileSync(path.join(root, 'CLASSROOM-PILOT-PROTOCOL.md'), 'utf8'), /실행 대기/);
