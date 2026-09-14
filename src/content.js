@@ -82,8 +82,18 @@ export const REVIEW_LINKS = [
   { label: '서울역사박물관 공평동 현장박물관 보도자료', url: 'https://museum.seoul.go.kr/www/board/NR_boardView.do?bbsCd=1015&seq=20180912165823934&sso=ok' },
 ];
 
+export const TEACHER_RESOURCES = [
+  { label: '교사용 20~30분 수업안', path: './TEACHER-CLASSROOM-GUIDE.md', meta: '목표·발문·오개념 대응' },
+  { label: '학생 활동지', path: './STUDENT-WORKSHEET.md', meta: '관찰·근거·설명 수정' },
+  { label: '형성평가', path: './FORMATIVE-ASSESSMENT.md', meta: '문항·정답·해설·보충 활동' },
+  { label: '전문가 검토 패킷', path: './EXPERT-REVIEW-PACKET.md', meta: '전문 감수 대기' },
+  { label: '역사 근거 매트릭스', path: './HISTORICAL-EVIDENCE-MATRIX.md', meta: '공식 근거·목업 경계' },
+  { label: '교실 파일럿 프로토콜', path: './CLASSROOM-PILOT-PROTOCOL.md', meta: '실행 대기·익명 기록' },
+];
+
 export const UPDATE_HISTORY = [
   { date: '2026-09-14', text: '역사 검수 P0 교정: 시대별 관찰·질문 분리, 1875 연대 경계, 합성 이미지 캡션과 검수 정보 영역을 보강했습니다.' },
+  { date: '2026-09-14', text: '교사용 수업안·학생 활동지·형성평가·전문가 검토 패킷·파일럿 프로토콜과 근거 매트릭스를 공개했습니다.' },
   { date: '2026-09-14', text: '합성 연습 거리, 목업 사료, 시점 경고와 설명 수정 흐름을 추가했습니다.' },
   { date: '2026-09-14', text: '320px·키보드 경로와 이미지 실패 시 평면도 대체를 준비했습니다.' },
 ];
