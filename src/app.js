@@ -22,7 +22,35 @@ function requiredAction() {
 
 function pulse(action) { return requiredAction() === action ? ' gi-pulse' : ''; }
 
+function captureFocus() {
+  const active = document.activeElement;
+  if (!active || !root.contains(active)) return null;
+  const data = active.dataset;
+  if (data.era) return { type: 'era', value: data.era };
+  if (data.claimType) return { type: 'claim', value: data.claimType };
+  if (data.source && data.relation) return { type: 'evidence', source: data.source, relation: data.relation };
+  if (data.action) return { type: 'action', value: data.action };
+  if (data.preset) return { type: 'preset', value: data.preset };
+  if (data.point) return { type: active.classList.contains('point-row') ? 'point-row' : 'point-marker', value: data.point };
+  return null;
+}
+
+function restoreFocus(descriptor) {
+  if (!descriptor) return;
+  const selectors = {
+    era: `[data-era="${descriptor.value}"]`,
+    claim: `[data-claim-type="${descriptor.value}"]`,
+    evidence: `[data-source="${descriptor.source}"][data-relation="${descriptor.relation}"]`,
+    action: `[data-action="${descriptor.value}"]`,
+    preset: `[data-preset="${descriptor.value}"]`,
+    'point-row': `.point-row[data-point="${descriptor.value}"]`,
+    'point-marker': `.point-marker[data-point="${descriptor.value}"]`,
+  };
+  root.querySelector(selectors[descriptor.type])?.focus({ preventScroll: true });
+}
+
 function render() {
+  const focusDescriptor = captureFocus();
   const era = selectedEra();
   const point = selectedPoint();
   const progress = getProgress(state);
@@ -109,6 +137,7 @@ function render() {
     <dialog class="update-dialog" data-update-dialog><div class="dialog-head row-between"><div><p class="eyebrow">CHANGELOG</p><h2>업데이트 내역</h2></div><button class="btn btn-ghost" data-action="close-updates" aria-label="업데이트 내역 닫기">닫기 ×</button></div><div class="update-list">${UPDATE_HISTORY.map((item) => `<div class="log-row"><span class="meta">${item.date}</span><p>${item.text}</p></div>`).join('')}</div><p class="meta">개발·개선 내역은 이 합성 연습용 화면의 변경 기록입니다.</p></dialog>`;
   bindEvents();
   installImageFallbacks();
+  restoreFocus(focusDescriptor);
 }
 
 function renderSource(source) {
